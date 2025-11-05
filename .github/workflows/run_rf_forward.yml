@@ -1,23 +1,18 @@
 name: Run RF Forward Training
 
 on:
-  workflow_dispatch:   # 👈 Cho phép chạy thủ công
+  workflow_dispatch:  # Cho phép chạy thủ công từ tab "Actions"
 
 jobs:
   run_rf_forward:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Lấy code từ repo (phải có)
+      # 1️⃣ Checkout repo (rất quan trọng)
       - name: Checkout repository
         uses: actions/checkout@v4
 
-     - name: Debug — list repo files
-        run: |
-        pwd
-        ls -R
-
-      # 2️⃣ Cài Python
+      # 2️⃣ Cài môi trường Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -29,23 +24,33 @@ jobs:
           pip install -U pip
           pip install numpy pandas scikit-learn imbalanced-learn matplotlib
 
-      # 4️⃣ Tải file dữ liệu mẫu (nếu cần)
+      # 4️⃣ Tải file dữ liệu mẫu về
       - name: Download dataset
         run: |
           mkdir -p data
           wget -O data/data2.csv https://github.com/thanhnha01/NCKH_ANHHONG/releases/download/v1.0/data2.csv
 
-      # 5️⃣ Chạy file chính
+      # 5️⃣ Debug — liệt kê toàn bộ file để xem rf_forward_train.py ở đâu
+      - name: Debug — list repo files
+        run: |
+          echo "📂 Current working directory:"
+          pwd
+          echo "📄 Files in current directory:"
+          ls -la
+          echo "📂 Full repo structure:"
+          ls -R
+
+      # 6️⃣ Chạy file Python chính
       - name: Run RF Forward training
         run: |
           python rf_forward_train.py
 
-      # 6️⃣ Nén kết quả đầu ra
+      # 7️⃣ Nén kết quả đầu ra (thư mục results)
       - name: Compress results
         run: |
           zip -r results.zip results
 
-      # 7️⃣ Đưa file nén lên mục Releases
+      # 8️⃣ Upload file nén lên phần Releases
       - name: Upload to Release
         uses: softprops/action-gh-release@v2
         with:
