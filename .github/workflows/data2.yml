@@ -42,10 +42,11 @@ jobs:
           echo "📂 Full repo structure:"
           ls -R
 
-      # 6️⃣ Chạy script chính
+      # 6️⃣ Chạy script chính và lưu log
       - name: Run RF Forward training
         run: |
-          python train_rf_sliding.py
+        mkdir -p results/logs
+        python train_rf_sliding.py > results/logs/run_log.txt 2>&1
 
       # 7️⃣ Nén thư mục kết quả (nếu có)
       - name: Compress results
