@@ -1,14 +1,14 @@
-name: Run RF Forward (Manual Only)
+name: Run RF Forward Training
 
 on:
-  workflow_dispatch:   # 👈 chỉ chạy thủ công
+  workflow_dispatch:   # 👈 Cho phép chạy thủ công
 
 jobs:
-  run-script:
+  run_rf_forward:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Lấy code trong repo
+      # 1️⃣ Lấy code từ repo (phải có)
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -16,40 +16,34 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: '3.10'
 
-      # 3️⃣ Tải file dữ liệu mẫu về
-      - name: Download sample dataset
-        run: |
-          mkdir -p data
-          wget -O data/data2.csv "https://github.com/thanhnha01/NCKH_ANHHONG/releases/download/v1.0/data2.csv"
-
-      # 4️⃣ Cài các thư viện cần thiết
+      # 3️⃣ Cài các thư viện cần thiết
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install pandas numpy scikit-learn imbalanced-learn matplotlib
+          pip install -U pip
+          pip install numpy pandas scikit-learn imbalanced-learn matplotlib
 
-      # 5️⃣ Chạy script chính
+      # 4️⃣ Tải file dữ liệu mẫu (nếu cần)
+      - name: Download dataset
+        run: |
+          mkdir -p data
+          wget -O data/data2.csv https://github.com/thanhnha01/NCKH_ANHHONG/releases/download/v1.0/data2.csv
+
+      # 5️⃣ Chạy file chính
       - name: Run RF Forward training
         run: |
           python rf_forward_train.py
 
-      # 6️⃣ Nén thư mục results thành file zip
-      - name: Zip results folder
+      # 6️⃣ Nén kết quả đầu ra
+      - name: Compress results
         run: |
-          zip -r results_${{ github.run_number }}.zip results/
+          zip -r results.zip results
 
-      # 7️⃣ Tạo Release mới và upload file zip
-      - name: Create GitHub Release and Upload Results
-        uses: softprops/action-gh-release@v1
+      # 7️⃣ Đưa file nén lên mục Releases
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: run-${{ github.run_number }}
-          name: "RF Forward Results #${{ github.run_number }}"
-          body: |
-            ✅ Kết quả huấn luyện Random Forest + SMOTETomek + Calibration (Sigmoid)
-            - Dữ liệu: data2.csv từ https://github.com/thanhnha01/NCKH_ANHHONG/releases/tag/v1.0
-            - Threshold chọn theo Recall≥0.8
-          files: results_${{ github.run_number }}.zip
+          files: results.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
