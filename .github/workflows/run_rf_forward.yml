@@ -1,14 +1,14 @@
 name: Run RF Forward Training
 
 on:
-  workflow_dispatch:  # Cho phép chạy thủ công từ tab "Actions"
+  workflow_dispatch:  # Chạy thủ công từ tab "Actions"
 
 jobs:
   run_rf_forward:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repo (rất quan trọng)
+      # 1️⃣ Lấy mã nguồn
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -18,19 +18,19 @@ jobs:
         with:
           python-version: '3.10'
 
-      # 3️⃣ Cài các thư viện cần thiết
+      # 3️⃣ Cài thư viện cần thiết
       - name: Install dependencies
         run: |
           pip install -U pip
           pip install numpy pandas scikit-learn imbalanced-learn matplotlib
 
-      # 4️⃣ Tải file dữ liệu mẫu về
+      # 4️⃣ Tải dữ liệu mẫu
       - name: Download dataset
         run: |
           mkdir -p data
           wget -O data/data2.csv https://github.com/thanhnha01/NCKH_ANHHONG/releases/download/v1.0/data2.csv
 
-      # 5️⃣ Debug — liệt kê toàn bộ file để xem rf_forward_train.py ở đâu
+      # 5️⃣ Debug — kiểm tra file
       - name: Debug — list repo files
         run: |
           echo "📂 Current working directory:"
@@ -40,20 +40,32 @@ jobs:
           echo "📂 Full repo structure:"
           ls -R
 
-      # 6️⃣ Chạy file Python chính
+      # 6️⃣ Chạy script chính
       - name: Run RF Forward training
         run: |
           python train_rf_sliding.py
 
-      # 7️⃣ Nén kết quả đầu ra (thư mục results)
+      # 7️⃣ Nén thư mục kết quả (nếu có)
       - name: Compress results
         run: |
-          zip -r results.zip results
+          zip -r results.zip results || echo "⚠️ Không tìm thấy thư mục results"
 
-      # 8️⃣ Upload file nén lên phần Releases
+      # 8️⃣ 🏷️ Tạo tag tự động để đính vào Release
+      - name: Create tag for release
+        run: |
+          TAG="auto-v$(date +'%Y%m%d-%H%M%S')"
+          echo "TAG=$TAG" >> $GITHUB_ENV
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag $TAG
+          git push origin $TAG
+
+      # 9️⃣ 📦 Upload file nén lên phần Releases
       - name: Upload to Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ env.TAG }}
+          name: "Auto Release ${{ env.TAG }}"
           files: results.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
