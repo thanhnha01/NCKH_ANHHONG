@@ -12,6 +12,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+     - name: Debug — list repo files
+        run: |
+        pwd
+        ls -R
+
       # 2️⃣ Cài Python
       - name: Set up Python
         uses: actions/setup-python@v5
