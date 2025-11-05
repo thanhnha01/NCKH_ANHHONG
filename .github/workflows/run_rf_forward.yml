@@ -3,6 +3,8 @@ name: Run RF Forward Training
 on:
   workflow_dispatch:  # Chạy thủ công từ tab "Actions"
 
+permissions:
+  contents: write   # 👈 Cho phép workflow tạo tag & release
 jobs:
   run_rf_forward:
     runs-on: ubuntu-latest
