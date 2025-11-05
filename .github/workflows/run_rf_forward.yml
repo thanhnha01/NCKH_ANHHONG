@@ -43,7 +43,7 @@ jobs:
       # 6️⃣ Chạy file Python chính
       - name: Run RF Forward training
         run: |
-          python rf_forward_train.py
+          python python train_rf_sliding.py
 
       # 7️⃣ Nén kết quả đầu ra (thư mục results)
       - name: Compress results
