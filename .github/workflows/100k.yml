@@ -1,4 +1,4 @@
-name: Run RF Forward Training
+name: 100k
 
 on:
   workflow_dispatch:  # Chạy thủ công từ tab "Actions"
