@@ -1,0 +1,46 @@
+name: Run RF Forward (Manual Only)
+
+on:
+  workflow_dispatch:   # 👈 chỉ chạy thủ công
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Lấy code trong repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Cài Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      # 3️⃣ Cài thư viện cần thiết
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas numpy scikit-learn imbalanced-learn matplotlib
+
+      # 4️⃣ Chạy script chính
+      - name: Run RF Forward training
+        run: |
+          python rf_forward_train.py
+
+      # 5️⃣ Nén thư mục results thành file zip
+      - name: Zip results folder
+        run: |
+          zip -r results_${{ github.run_number }}.zip results/
+
+      # 6️⃣ Tải file zip lên GitHub Releases
+      - name: Create GitHub Release and Upload Results
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: run-${{ github.run_number }}
+          name: "RF Forward Results #${{ github.run_number }}"
+          body: "Kết quả huấn luyện Random Forest + SMOTETomek + Calibration (Sigmoid)"
+          files: results_${{ github.run_number }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
