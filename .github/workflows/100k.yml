@@ -1,0 +1,73 @@
+name: Run RF Forward Training
+
+on:
+  workflow_dispatch:  # Chạy thủ công từ tab "Actions"
+
+permissions:
+  contents: write   # 👈 Cho phép workflow tạo tag & release
+jobs:
+  run_rf_forward:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Lấy mã nguồn
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Cài môi trường Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # 3️⃣ Cài thư viện cần thiết
+      - name: Install dependencies
+        run: |
+          pip install -U pip
+          pip install numpy pandas scikit-learn imbalanced-learn matplotlib
+
+      # 4️⃣ Tải dữ liệu mẫu
+      - name: Download dataset
+        run: |
+          mkdir -p data
+          wget -O data/100k.csv https://github.com/thanhnha01/NCKH_ANHHONG/releases/download/v1.0/100k.csv
+
+      # 5️⃣ Debug — kiểm tra file
+      - name: Debug — list repo files
+        run: |
+          echo "📂 Current working directory:"
+          pwd
+          echo "📄 Files in current directory:"
+          ls -la
+          echo "📂 Full repo structure:"
+          ls -R
+
+      # 6️⃣ Chạy script chính
+      - name: Run RF Forward training
+        run: |
+          python train_rf_sliding.py
+
+      # 7️⃣ Nén thư mục kết quả (nếu có)
+      - name: Compress results
+        run: |
+          zip -r results.zip results || echo "⚠️ Không tìm thấy thư mục results"
+
+      # 8️⃣ 🏷️ Tạo tag tự động để đính vào Release
+      - name: Create tag for release
+        run: |
+          TAG="auto-v$(date +'%Y%m%d-%H%M%S')"
+          echo "TAG=$TAG" >> $GITHUB_ENV
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag $TAG
+          git push origin $TAG
+
+      # 9️⃣ 📦 Upload file nén lên phần Releases
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          name: "Auto Release ${{ env.TAG }}"
+          files: results.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
