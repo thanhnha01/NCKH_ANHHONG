@@ -22,10 +22,10 @@ from sklearn.metrics import (
 )
 
 # ======================= CONFIG =======================
-CSV_PATH = "data/data2.csv"       # 👈 chạy thử với các mức data
+CSV_PATH = "data/100k.csv"       # 👈 chạy thử với các mức data
 TARGET_COL = "isFraud"
-N_SPLITS = 4
-VALID_RATIO, TEST_RATIO = 0.15, 0.15
+N_SPLITS = 5
+VALID_RATIO, TEST_RATIO = 0.1, 0.1
 RANDOM_SEED, N_TREES = 42, 400
 TARGET_RECALL = 0.8
 CALIB_METHOD = "sigmoid"
@@ -262,3 +262,4 @@ def main():
 # ==========================================================
 if __name__ == "__main__":
     main()
+
