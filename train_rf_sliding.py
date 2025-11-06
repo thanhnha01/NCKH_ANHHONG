@@ -23,11 +23,11 @@ from sklearn.metrics import (
 )
 
 # ======================= CONFIG =======================
-parser = argparse.ArgumentParser()
-parser.add_argument("--input", type=str, default="data/100k.csv")
-args = parser.parse_args()
-CSV_PATH = args.input
-#CSV_PATH = "data/100k.csv"       # 👈 chạy thử với các mức data
+#parser = argparse.ArgumentParser()
+#parser.add_argument("--input", type=str, default="data/100k.csv")
+#args = parser.parse_args()
+#CSV_PATH = args.input
+CSV_PATH = "data/data2.csv"       # 👈 chạy thử với các mức data
 TARGET_COL = "isFraud"
 N_SPLITS = 5
 VALID_RATIO, TEST_RATIO = 0.1, 0.1
@@ -267,5 +267,6 @@ def main():
 # ==========================================================
 if __name__ == "__main__":
     main()
+
 
 
