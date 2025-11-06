@@ -9,7 +9,6 @@ permissions:
 jobs:
   run_rf_forward:
     runs-on: ubuntu-latest
-    timeout-minutes: 60  # Giới hạn thời gian tránh treo
 
     steps:
       # 1️⃣ Lấy mã nguồn
