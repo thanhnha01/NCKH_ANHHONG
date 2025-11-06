@@ -4,11 +4,12 @@ on:
   workflow_dispatch:  # Chạy thủ công từ tab "Actions"
 
 permissions:
-  contents: write   # Cho phép workflow tạo tag & release
+  contents: write   # Cho phép tạo tag & release
 
 jobs:
   run_rf_forward:
     runs-on: ubuntu-latest
+    timeout-minutes: 60  # Giới hạn thời gian tránh treo
 
     steps:
       # 1️⃣ Lấy mã nguồn
@@ -27,50 +28,30 @@ jobs:
           pip install -U pip
           pip install numpy pandas scikit-learn imbalanced-learn matplotlib argparse
 
-      # 4️⃣ Tải dữ liệu mẫu (nếu muốn download nhiều file, sửa url hoặc thêm file vào data/)
+      # 4️⃣ Tải dữ liệu mẫu
       - name: Download dataset
         run: |
           mkdir -p data
           wget -O data/data2.csv https://github.com/thanhnha01/NCKH_ANHHONG/releases/download/v1.0/data2.csv
+          echo "✅ Dataset downloaded:"
+          ls -lh data/
 
-      # 5️⃣ Debug — kiểm tra file
-      - name: Debug — list repo files
-        run: |
-          echo "📂 Current working directory:"
-          pwd
-          echo "📄 Files in current directory:"
-          ls -la
-          echo "📂 Full repo structure:"
-          ls -R
-
-      # 6️⃣ Chạy script trên tất cả dataset và lưu log riêng
-      - name: Run RF Forward training on all datasets
+      # 5️⃣ Chạy huấn luyện và lưu log
+      - name: Run RF Forward training
         run: |
           mkdir -p results/logs
-          for f in data/*.csv; do
-              filename=$(basename $f .csv)
-              echo "🔹 Running on $filename"
-              python train_rf_sliding.py --input $f > results/logs/run_${filename}.txt 2>&1
-              # Nén kết quả từng dataset
-              zip -r results_${filename}.zip results || true
-          done
+          echo "🔹 Running training on data2.csv"
+          python train_rf_sliding.py --input data/data2.csv > results/logs/run_data2.txt 2>&1
+          zip -r results_data2.zip results || true
 
-      # 7️⃣ 🏷️ Tạo tag tự động để đính vào Release
-      - name: Create tag for release
-        run: |
-          TAG="auto-v$(date +'%Y%m%d-%H%M%S')"
-          echo "TAG=$TAG" >> $GITHUB_ENV
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag $TAG
-          git push origin $TAG
-
-      # 8️⃣ 📦 Upload tất cả zip kết quả lên phần Releases
-      - name: Upload to Release
+      # 6️⃣ Tạo tag & release kết quả
+      - name: Create release and upload results
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.TAG }}
-          name: "Auto Release ${{ env.TAG }}"
-          files: results_*.zip
+          tag_name: auto-v${{ github.run_id }}
+          name: "Auto Release (Run ${{ github.run_id }})"
+          files: |
+            results_data2.zip
+            results/logs/run_data2.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
