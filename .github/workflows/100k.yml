@@ -36,11 +36,11 @@ jobs:
           ls -lh data/
 
       # 5️⃣ Chạy huấn luyện và lưu log
+      # python train_rf_sliding.py --input data/data2.csv > results/logs/run_data2.txt 2>&1
       - name: Run RF Forward training
         run: |
           mkdir -p results/logs
           echo "🔹 Running training on data2.csv"
-          //python train_rf_sliding.py --input data/data2.csv > results/logs/run_data2.txt 2>&1
           python train_rf_sliding.py
           zip -r results_data2.zip results || true
 
